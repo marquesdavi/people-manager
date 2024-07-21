@@ -1,5 +1,7 @@
 package com.api.manager.people.exception.handler;
 
+import com.api.manager.people.exception.AlreadyExistsException;
+import com.api.manager.people.exception.GenericException;
 import com.api.manager.people.exception.NotFoundException;
 import com.api.manager.people.util.error.ValidationError;
 import jakarta.validation.ConstraintViolationException;
@@ -23,17 +25,27 @@ public class GenericExceptionHandler {
         return ResponseEntity.status(exception.getStatusCode()).body(exception.getMessage());
     }
 
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<DefaultResponseDTO> handleUncaughtException(Exception exception) {
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                .body(new DefaultResponseDTO(false, exception.getMessage()));
-//    }
-//
-//    @ExceptionHandler(GenericException.class)
-//    public ResponseEntity<DefaultResponseDTO> handleGenericException(GenericException exception) {
-//        return ResponseEntity.status(exception.getStatusCode())
-//                .body(new DefaultResponseDTO(false, exception.getMessage()));
-//    }
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<String> handleAlreadyExistsException(AlreadyExistsException exception) {
+        return ResponseEntity.status(exception.getStatusCode()).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity handleUncaughtException(Exception exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(exception.getMessage());
+    }
+
+    @ExceptionHandler(GenericException.class)
+    public ResponseEntity handleGenericException(GenericException exception) {
+        return ResponseEntity.status(exception.getStatusCode())
+                .body(exception.getMessage());
+    }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
