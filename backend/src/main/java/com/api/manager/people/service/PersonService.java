@@ -1,15 +1,15 @@
 package com.api.manager.people.service;
 
-import com.api.manager.people.dto.person.PersonRequest;
-import com.api.manager.people.dto.person.PersonResponse;
-import org.springframework.data.domain.Page;
+import com.api.manager.people.model.dto.person.PersonRequest;
+import com.api.manager.people.model.dto.person.PersonResponse;
+import com.api.manager.people.model.vo.DefaultResponse;
 
 import java.util.List;
 
 public interface PersonService {
     void createPerson(PersonRequest request);
-
     PersonResponse getById(Long id);
-
     List<PersonResponse> getAll(Integer page, Integer size, String orderBy, String direction);
+    DefaultResponse updatePerson(Long id, PersonRequest request);
+    DefaultResponse deletePerson(Long id);
 }

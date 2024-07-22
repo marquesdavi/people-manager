@@ -1,4 +1,4 @@
-package com.api.manager.people.dto.person;
+package com.api.manager.people.model.dto.person;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
