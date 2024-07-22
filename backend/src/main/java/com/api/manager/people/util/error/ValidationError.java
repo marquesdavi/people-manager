@@ -1,5 +1,8 @@
 package com.api.manager.people.util.error;
 
+import lombok.Data;
+
+@Data
 public class ValidationError {
 
     private String field;

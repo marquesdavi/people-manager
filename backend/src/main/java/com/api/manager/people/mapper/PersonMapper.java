@@ -1,10 +1,9 @@
 package com.api.manager.people.mapper;
 
 import com.api.manager.people.domain.person.Person;
-import com.api.manager.people.dto.person.PersonRequest;
-import com.api.manager.people.dto.person.PersonResponse;
+import com.api.manager.people.model.dto.person.PersonRequest;
+import com.api.manager.people.model.dto.person.PersonResponse;
 import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Component;
 
 public class PersonMapper {
     public static PersonResponse toDTO(Person person) {
