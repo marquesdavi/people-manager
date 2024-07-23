@@ -10,6 +10,7 @@ import com.api.manager.people.model.vo.DefaultResponse;
 import com.api.manager.people.repository.IPersonRepository;
 import com.api.manager.people.service.impl.PersonServiceImplementation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,6 +48,7 @@ public class PersonServiceImplementationTest {
     }
 
     @Test
+    @DisplayName("Create person should save person")
     void createPerson_shouldSavePerson() {
         when(repository.save(any(Person.class))).thenReturn(person);
 
@@ -56,6 +58,7 @@ public class PersonServiceImplementationTest {
     }
 
     @Test
+    @DisplayName("Create person should throw AlreadyExistsException")
     void createPerson_shouldThrowAlreadyExistsException() {
         when(repository.findByCpf(personRequest.cpf())).thenReturn(Optional.of(person));
 
@@ -67,6 +70,7 @@ public class PersonServiceImplementationTest {
     }
 
     @Test
+    @DisplayName("Update person should update existing person")
     void updatePerson_shouldUpdateExistingPerson() {
         when(repository.findById(1L)).thenReturn(Optional.of(person));
 
@@ -77,6 +81,7 @@ public class PersonServiceImplementationTest {
     }
 
     @Test
+    @DisplayName("Update person should throw NotFoundException")
     void updatePerson_shouldThrowNotFoundException() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
@@ -88,6 +93,7 @@ public class PersonServiceImplementationTest {
     }
 
     @Test
+    @DisplayName("Delete person should delete existing person")
     void deletePerson_shouldDeleteExistingPerson() {
         when(repository.findById(1L)).thenReturn(Optional.of(person));
 
@@ -98,6 +104,7 @@ public class PersonServiceImplementationTest {
     }
 
     @Test
+    @DisplayName("Delete person should throw NotFoundException")
     void deletePerson_shouldThrowNotFoundException() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
@@ -109,6 +116,7 @@ public class PersonServiceImplementationTest {
     }
 
     @Test
+    @DisplayName("Get person by ID should return person response")
     void getById_shouldReturnPersonResponse() {
         when(repository.findById(1L)).thenReturn(Optional.of(person));
 
@@ -119,6 +127,7 @@ public class PersonServiceImplementationTest {
     }
 
     @Test
+    @DisplayName("Get person by ID should throw NotFoundException")
     void getById_shouldThrowNotFoundException() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
@@ -130,6 +139,7 @@ public class PersonServiceImplementationTest {
     }
 
     @Test
+    @DisplayName("Get all persons should return page of person responses")
     void getAll_shouldReturnPageOfPersonResponses() {
         Page<Person> page = new PageImpl<>(List.of(person));
         when(repository.findAll(any(PageRequest.class))).thenReturn(page);
