@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,15 +48,16 @@ public class PersonController {
     })
     @GetMapping("/")
     @Cacheable(value = "people-find-all")
-    public ResponseEntity<List<PersonResponse>> getAllPeople(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
+    public ResponseEntity<Map<String, Object>> getAllPeople(
+            @RequestParam(defaultValue = "0") Integer startRow,
+            @RequestParam(defaultValue = "10") Integer endRow,
             @RequestParam(value = "orderBy", defaultValue = "name") String orderBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ) {
-        List<PersonResponse> people = personService.getAll(page, size, orderBy, direction);
-        return ResponseEntity.ok(people);
+        Map<String, Object> response = personService.getAll(startRow, endRow, orderBy, direction);
+        return ResponseEntity.ok(response);
     }
+
 
     @Operation(summary = "Create a new person")
     @ApiResponses(value = {

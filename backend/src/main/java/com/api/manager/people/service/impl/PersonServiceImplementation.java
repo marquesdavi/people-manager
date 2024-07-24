@@ -18,7 +18,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.security.InvalidParameterException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.api.manager.people.util.validation.GenericValidation.*;
 
@@ -92,20 +95,38 @@ public class PersonServiceImplementation implements PersonService {
     }
 
     @Override
-    public List<PersonResponse> getAll(
-            @PositiveOrZero Integer page,
-            @Positive Integer size,
+    public Map<String, Object> getAll(
+            @PositiveOrZero Integer startRow,
+            @Positive Integer endRow,
             String orderBy,
             String direction
     ) {
         validateOrderBy(Person.class, orderBy);
         Sort.Direction sortDirection = validateSortDirection(direction);
 
-        PageRequest pageable = PageRequest.of(page, size, sortDirection, orderBy);
-        Page<Person> persons = repository.findAll(pageable);
+        if (startRow > endRow){
+            log.error("startRow must be less than endRow");
+            throw new IllegalArgumentException("startRow must be less than endRow");
+        }
 
-        return persons.stream().map(PersonMapper::toDTO).toList();
+        int page = startRow / (endRow - startRow);
+        int size = endRow - startRow;
+        PageRequest pageable = PageRequest.of(page, size, sortDirection, orderBy);
+
+        Page<Person> persons = repository.findAll(pageable);
+        long totalRows = repository.count();
+
+        List<PersonResponse> personResponses = persons.stream()
+                .map(PersonMapper::toDTO)
+                .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("lastRow", totalRows);
+        response.put("rows", personResponses);
+
+        return response;
     }
+
 
     public Person findPersonById(Long id) {
         return repository.findById(id)

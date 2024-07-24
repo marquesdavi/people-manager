@@ -1,8 +1,9 @@
 <template>
     <v-container class="d-flex justify-center align-center" style="min-height: 100vh;">
         <v-card style="width: 80%;">
-            <v-card-title>
+            <v-card-title class="d-flex justify-space-between align-center">
                 Listagem de Pessoas
+                <v-btn color="primary" @click="openModal">Cadastrar</v-btn>
             </v-card-title>
             <v-data-table :headers="headers" :items="items" :server-items-length="totalItems" :loading="loading"
                 :options.sync="options" @update:options="fetchData" class="elevation-1">
@@ -12,11 +13,34 @@
                 </template>
             </v-data-table>
         </v-card>
+
+        <v-dialog v-model="showModal" max-width="600px">
+            <v-card>
+                <v-card-title>
+                    <span class="headline">Cadastrar Pessoa</span>
+                </v-card-title>
+                <v-card-text>
+                    <v-form ref="form" v-model="valid" lazy-validation>
+                        <v-text-field v-model="newPerson.name" :rules="nameRules" label="Name" required></v-text-field>
+                        <v-text-field v-model="newPerson.email" :rules="emailRules" label="Email"
+                            required></v-text-field>
+                        <v-text-field v-model="newPerson.cpf" :rules="cpfRules" label="CPF" required></v-text-field>
+                        <v-date-input v-model="newPerson.birthDate" label="Birth Date" :rules="dateRules"
+                            required></v-date-input>
+                    </v-form>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="closeModal">Cancelar</v-btn>
+                    <v-btn color="blue darken-1" text @click="createPerson">Salvar</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </v-container>
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../utils/request';
 
 export default {
     name: 'Home',
@@ -35,10 +59,34 @@ export default {
             loading: true,
             options: {
                 page: 1,
-                itemsPerPage: 5,
+                itemsPerPage: 10,
                 sortBy: [],
                 sortDesc: [],
             },
+            showModal: false,
+            newPerson: {
+                name: '',
+                email: '',
+                cpf: '',
+                birthDate: '',
+            },
+            valid: true,
+            nameRules: [
+                v => !!v || 'Name is required',
+                v => (v && v.length <= 50) || 'Name must be less than 50 characters',
+            ],
+            emailRules: [
+                v => !!v || 'Email is required',
+                v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+            ],
+            cpfRules: [
+                v => !!v || 'CPF is required',
+                v => /^\d{11}$/.test(v) || 'CPF must be 11 digits',
+            ],
+            dateRules: [
+                v => !!v || 'Birth Date is required',
+                v => /^\d{4}-\d{2}-\d{2}$/.test(v) || 'Birth Date must be in the format YYYY-MM-DD',
+            ],
         };
     },
     methods: {
@@ -48,21 +96,17 @@ export default {
             const { page, itemsPerPage, sortBy, sortDesc } = this.options;
 
             const startRow = (page - 1) * itemsPerPage;
-            const endRow = page * itemsPerPage;
+            const endRow = startRow + itemsPerPage;
             const orderBy = (sortBy && sortBy.length > 0) ? sortBy[0] : 'birthDate';
             const direction = (sortDesc && sortDesc.length > 0 && sortDesc[0]) ? 'DESC' : 'ASC';
 
             try {
-                const token = localStorage.getItem('accessToken');
-                const response = await axios.get('http://localhost:8080/person/', {
+                const response = await api.get('/person/', {
                     params: {
                         startRow,
                         endRow,
                         orderBy,
                         direction,
-                    },
-                    headers: {
-                        Authorization: `Bearer ${token}`,
                     },
                 });
 
@@ -81,6 +125,34 @@ export default {
         deleteItem(item) {
             // Lógica para deletar o item
             console.log('Delete item:', item);
+        },
+        openModal() {
+            this.showModal = true;
+        },
+        closeModal() {
+            this.showModal = false;
+            this.newPerson = {
+                name: '',
+                email: '',
+                cpf: '',
+                birthDate: '',
+            };
+        },
+        async createPerson() {
+            if (this.$refs.form.validate()) {
+                try {
+                    await api.post('/person/', {
+                        name: this.newPerson.name,
+                        email: this.newPerson.email,
+                        cpf: this.newPerson.cpf,
+                        birthDate: this.newPerson.birthDate,
+                    });
+                    this.closeModal();
+                    this.fetchData();
+                } catch (error) {
+                    console.error('Error creating person:', error);
+                }
+            }
         },
     },
     watch: {

@@ -9,8 +9,13 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 small fw-bolder">
-                    <li class="nav-item"><router-link class="nav-link" to="/login">Login</router-link></li>
-                    <li class="nav-item"><router-link class="nav-link" to="/signup">Register</router-link></li>
+                    <li class="nav-item" v-if="!isAuthenticated"><router-link class="nav-link"
+                            to="/login">Login</router-link></li>
+                    <li class="nav-item" v-if="!isAuthenticated"><router-link class="nav-link"
+                            to="/signup">Register</router-link></li>
+                    <li class="nav-item" v-if="isAuthenticated">
+                        <button class="btn btn-link nav-link" @click="handleLogout">Logout</button>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -20,7 +25,25 @@
 <script>
 export default {
     name: 'Navbar',
+    data() {
+        return {
+            isAuthenticated: !!localStorage.getItem('accessToken'),
+        };
+    },
+    methods: {
+        handleLogout() {
+            localStorage.removeItem('accessToken');
+            this.$router.push('/login');
+        },
+    },
+    watch: {
+        '$route'() {
+            this.isAuthenticated = !!localStorage.getItem('accessToken');
+        },
+    },
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Adicione estilos personalizados aqui, se necessário */
+</style>

@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../utils/request';
 
 export default {
     name: 'Signup',
@@ -41,7 +41,7 @@ export default {
     methods: {
         async handleSignup() {
             try {
-                await axios.post('http://localhost:8080/user/', {
+                await api.post('/user/', {
                     firstName: this.firstName,
                     lastName: this.lastName,
                     email: this.email,

@@ -6,9 +6,11 @@
                     <div class="small m-0">Copyright &copy; Daví Marques - 2024</div>
                 </div>
                 <div class="col-auto">
-                    <a class="small"><router-link to="/login">Login</router-link></a>
-                    <span class="mx-1">&middot;</span>
-                    <a class="small"><router-link to="/signup">Register</router-link></a>
+                    <span v-if="!isLoggedIn">
+                        <a class="small"><router-link to="/login">Login</router-link></a>
+                        <span class="mx-1">&middot;</span>
+                        <a class="small"><router-link to="/signup">Register</router-link></a>
+                    </span>
                 </div>
             </div>
         </div>
@@ -18,6 +20,11 @@
 <script>
 export default {
     name: 'Footer',
+    computed: {
+        isLoggedIn() {
+            return !!localStorage.getItem('accessToken');
+        }
+    }
 };
 </script>
 

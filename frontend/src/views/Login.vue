@@ -12,11 +12,12 @@
             </div>
             <button type="submit" class="btn btn-primary">Login</button>
         </form>
+        <p v-if="error" class="text-danger">{{ error }}</p>
     </div>
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../utils/request';
 
 export default {
     name: 'Login',
@@ -30,7 +31,7 @@ export default {
     methods: {
         async handleLogin() {
             try {
-                const response = await axios.post('http://localhost:8080/login', {
+                const response = await api.post('/login', {
                     email: this.email,
                     password: this.password,
                 });
