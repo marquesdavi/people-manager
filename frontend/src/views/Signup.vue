@@ -1,27 +1,25 @@
 <template>
-    <div class="container py-5">
-        <h2>Signup</h2>
-        <form @submit.prevent="handleSignup">
-            <div class="mb-3">
-                <label for="firstName" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="firstName" v-model="firstName" required>
-            </div>
-            <div class="mb-3">
-                <label for="lastName" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="lastName" v-model="lastName" required>
-            </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email address</label>
-                <input type="email" class="form-control" id="email" v-model="email" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" v-model="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Signup</button>
-            <p v-if="error" class="text-danger">{{ error }}</p>
-        </form>
-    </div>
+    <v-container class="d-flex justify-center align-center" style="min-height: 100vh;">
+        <v-card style="width: 400px;">
+            <v-card-title class="d-flex justify-center">
+                <h2>Signup</h2>
+            </v-card-title>
+            <v-card-text>
+                <v-form @submit.prevent="handleSignup">
+                    <v-text-field v-model="firstName" label="First Name" required>
+                    </v-text-field>
+                    <v-text-field v-model="lastName" label="Last Name" required>
+                    </v-text-field>
+                    <v-text-field v-model="email" label="Email address" type="email" required>
+                    </v-text-field>
+                    <v-text-field v-model="password" label="Password" type="password" required>
+                    </v-text-field>
+                    <v-btn type="submit" color="primary" block>Signup</v-btn>
+                </v-form>
+                <v-alert v-if="error" type="error" class="mt-3">{{ error }}</v-alert>
+            </v-card-text>
+        </v-card>
+    </v-container>
 </template>
 
 <script>
@@ -52,5 +50,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
