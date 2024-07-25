@@ -21,7 +21,6 @@ api.interceptors.request.use(
 api.interceptors.response.use(
 	(response) => response,
 	async (error) => {
-		console.error("Erro de resposta da API:", error);
 		if (error.response && error.response.status === 400) {
 			const authStore = useAuthStore();
 			authStore.clearToken();
