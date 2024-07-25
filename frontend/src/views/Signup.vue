@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import api from '../utils/request';
+import { useAuthStore } from '../stores/auth';
 
 export default {
     name: 'Signup',
@@ -40,15 +40,9 @@ export default {
     },
     methods: {
         async handleSignup() {
+            const authStore = useAuthStore();
             try {
-                await api.post('/user/', {
-                    firstName: this.firstName,
-                    lastName: this.lastName,
-                    email: this.email,
-                    password: this.password,
-                });
-
-                // Redirecione para a página de login após o registro bem-sucedido
+                await authStore.signup(this.firstName, this.lastName, this.email, this.password);
                 this.$router.push('/login');
             } catch (error) {
                 this.error = 'Signup failed. Please check your information and try again.';

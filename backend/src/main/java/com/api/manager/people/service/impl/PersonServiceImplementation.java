@@ -94,37 +94,21 @@ public class PersonServiceImplementation implements PersonService {
         return PersonMapper.toDTO(person);
     }
 
+
     @Override
-    public Map<String, Object> getAll(
-            @PositiveOrZero Integer startRow,
-            @Positive Integer endRow,
+    public List<PersonResponse> getAll(
+            @PositiveOrZero Integer page,
+            @Positive Integer size,
             String orderBy,
             String direction
     ) {
         validateOrderBy(Person.class, orderBy);
         Sort.Direction sortDirection = validateSortDirection(direction);
 
-        if (startRow > endRow){
-            log.error("startRow must be less than endRow");
-            throw new IllegalArgumentException("startRow must be less than endRow");
-        }
-
-        int page = startRow / (endRow - startRow);
-        int size = endRow - startRow;
         PageRequest pageable = PageRequest.of(page, size, sortDirection, orderBy);
-
         Page<Person> persons = repository.findAll(pageable);
-        long totalRows = repository.count();
 
-        List<PersonResponse> personResponses = persons.stream()
-                .map(PersonMapper::toDTO)
-                .toList();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("lastRow", totalRows);
-        response.put("rows", personResponses);
-
-        return response;
+        return persons.stream().map(PersonMapper::toDTO).toList();
     }
 
 

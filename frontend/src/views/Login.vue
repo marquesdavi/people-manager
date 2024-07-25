@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import api from '../utils/request';
+import { useAuthStore } from '../stores/auth';
 
 export default {
     name: 'Login',
@@ -30,18 +30,9 @@ export default {
     },
     methods: {
         async handleLogin() {
+            const authStore = useAuthStore();
             try {
-                const response = await api.post('/login', {
-                    email: this.email,
-                    password: this.password,
-                });
-                const { accessToken, expiresIn } = response.data;
-
-                // Armazene o token e o tempo de expiração conforme necessário
-                localStorage.setItem('accessToken', accessToken);
-                localStorage.setItem('expiresIn', expiresIn);
-
-                // Redirecione ou faça outras ações conforme necessário
+                await authStore.login(this.email, this.password);
                 this.$router.push('/');
             } catch (error) {
                 this.error = 'Login failed. Please check your credentials and try again.';

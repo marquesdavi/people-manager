@@ -10,7 +10,7 @@ import java.util.Map;
 public interface PersonService {
     void createPerson(PersonRequest request);
     PersonResponse getById(Long id);
-    Map<String, Object> getAll(Integer startRow, Integer endRow, String orderBy, String direction);
+    List<PersonResponse> getAll(Integer page, Integer size, String orderBy, String direction);
     DefaultResponse updatePerson(Long id, PersonRequest request);
     DefaultResponse deletePerson(Long id);
 }

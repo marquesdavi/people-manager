@@ -1,38 +1,38 @@
 import axios from "axios";
 import router from "../router";
+import { useAuthStore } from "../stores/auth";
 
-// Cria uma instância do axios com configuração base
 const api = axios.create({
 	baseURL: "http://localhost:8080", // Base URL da API
 });
 
-// Intercepta todas as requisições para adicionar o token de autenticação
 api.interceptors.request.use(
-	async (config) => {
-		const token = localStorage.getItem("accessToken");
-		if (token) {
-			config.headers.Authorization = `Bearer ${token}`;
+	(config) => {
+		const authStore = useAuthStore();
+		if (authStore.token) {
+			config.headers.Authorization = `Bearer ${authStore.token}`;
 		}
 		return config;
 	},
 	(error) => Promise.reject(error)
 );
 
-// Intercepta todas as respostas para lidar com tokens expirados
 api.interceptors.response.use(
 	(response) => response,
 	async (error) => {
-		if (error.response && error.response.status === 401) {
-			localStorage.removeItem("accessToken");
+		console.error("Erro de resposta da API:", error);
+		if (error.response && error.response.status === 400) {
+			const authStore = useAuthStore();
+			authStore.clearToken();
 			router.push("/login");
 		}
 		return Promise.reject(error);
 	}
 );
 
-// Função para verificar a validade do token
 export async function validateToken() {
-	const token = localStorage.getItem("accessToken");
+	const authStore = useAuthStore();
+	const token = authStore.token;
 	if (!token) return false;
 
 	try {

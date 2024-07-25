@@ -48,14 +48,14 @@ public class PersonController {
     })
     @GetMapping("/")
     @Cacheable(value = "people-find-all")
-    public ResponseEntity<Map<String, Object>> getAllPeople(
-            @RequestParam(defaultValue = "0") Integer startRow,
-            @RequestParam(defaultValue = "10") Integer endRow,
+    public ResponseEntity<List<PersonResponse>> getAllPeople(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(value = "orderBy", defaultValue = "name") String orderBy,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction
     ) {
-        Map<String, Object> response = personService.getAll(startRow, endRow, orderBy, direction);
-        return ResponseEntity.ok(response);
+        List<PersonResponse> people = personService.getAll(page, size, orderBy, direction);
+        return ResponseEntity.ok(people);
     }
 
 

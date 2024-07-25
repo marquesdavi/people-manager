@@ -140,22 +140,15 @@ public class PersonServiceImplementationTest {
     }
 
     @Test
-    @DisplayName("Get all persons should return page of person responses with total count")
-    void getAll_shouldReturnPageOfPersonResponsesWithTotalCount() {
+    @DisplayName("Get all persons should return page of person responses")
+    void getAll_shouldReturnPageOfPersonResponses() {
         Page<Person> page = new PageImpl<>(List.of(person));
         when(repository.findAll(any(PageRequest.class))).thenReturn(page);
-        when(repository.count()).thenReturn(1L);
 
-        Map<String, Object> response = service.getAll(0, 10, "name", "ASC");
+        List<PersonResponse> responses = service.getAll(0, 10, "name", "ASC");
 
-        // Verifica se a lista de respostas não está vazia
-        assertFalse(((List<PersonResponse>) response.get("rows")).isEmpty());
-
-        // Verifica se o nome do primeiro objeto na lista de respostas é igual ao nome da pessoa
-        assertEquals(person.getName(), ((List<PersonResponse>) response.get("rows")).get(0).name());
-
-        // Verifica se o total de linhas retornado é igual ao valor esperado
-        assertEquals(1L, response.get("lastRow"));
+        assertFalse(responses.isEmpty());
+        assertEquals(person.getName(), responses.get(0).name());
     }
 
 }

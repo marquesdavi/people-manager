@@ -1,17 +1,26 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
+import { createPinia } from "pinia"; // Importar Pinia
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap";
 import { createVuetify } from "vuetify";
 import "vuetify/styles";
 import "@mdi/font/css/materialdesignicons.css";
+import { VDateInput } from "vuetify/labs/VDateInput";
 import api, { validateToken } from "./utils/request";
 
-const vuetify = createVuetify();
+const vuetify = createVuetify({
+	components: {
+		VDateInput,
+	},
+});
 
+const pinia = createPinia(); // Criar instância do Pinia
 const app = createApp(App);
+
 app.use(router);
+app.use(pinia); // Usar Pinia na aplicação
 app.use(vuetify);
 
 router.beforeEach(async (to, from, next) => {
