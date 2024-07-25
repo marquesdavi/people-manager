@@ -40,7 +40,7 @@ export default {
     position: fixed;
     top: 70px;
     left: 10px;
-    z-index: 2000;
+    z-index: 9999999999;
     width: 25%;
 }
 </style>

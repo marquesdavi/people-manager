@@ -18,7 +18,7 @@
             </v-card-actions>
         </v-card>
 
-        <v-dialog v-model="dialog" max-width="500px">
+        <v-dialog v-model="dialog" max-width="500px" @click:outside="closeDialog">
             <v-card>
                 <v-card-title>
                     <span class="text-h5">{{ isEditMode ? 'Editar Pessoa' : 'Cadastrar Pessoa' }}</span>
@@ -27,10 +27,13 @@
                     <v-form @submit.prevent="handleSubmit">
                         <v-text-field v-model="person.name" label="Nome" required></v-text-field>
                         <v-text-field v-model="person.email" label="Email" type="email" required></v-text-field>
-                        <v-text-field v-model="person.cpf" label="CPF" required></v-text-field>
+                        <v-text-field v-mask="'###.###.###-##'" v-model="person.cpf" label="CPF"
+                            required></v-text-field>
                         <v-text-field v-model="person.birthDate" label="Data de Nascimento" type="date"
                             required></v-text-field>
-                        <v-btn type="submit" color="primary">{{ isEditMode ? 'Atualizar' : 'Salvar' }}</v-btn>
+                        <v-btn type="submit" color="primary" :loading="isSubmitting">
+                            {{ isEditMode ? 'Atualizar' : 'Salvar' }}
+                        </v-btn>
                     </v-form>
                 </v-card-text>
             </v-card>
@@ -58,7 +61,7 @@
                     <p><strong>ID:</strong> {{ personDetails.id }}</p>
                     <p><strong>Nome:</strong> {{ personDetails.name }}</p>
                     <p><strong>Email:</strong> {{ personDetails.email }}</p>
-                    <p><strong>CPF:</strong> {{ personDetails.cpf }}</p>
+                    <p><strong>CPF:</strong> {{ formatCPF(personDetails.cpf) }}</p>
                     <p><strong>Data de Nascimento:</strong> {{ personDetails.birthDate }}</p>
                 </v-card-text>
                 <v-card-actions>
@@ -72,9 +75,11 @@
 <script>
 import api from '../utils/request';
 import { showAlert } from '../utils/alertUtil';
+import { mask } from 'vue-the-mask';
 
 export default {
     name: 'Home',
+    directives: { mask },
     data() {
         return {
             headers: [
@@ -108,7 +113,7 @@ export default {
             },
             deletePersonId: null,
             isEditMode: false,
-            error: null,
+            isSubmitting: false,
             isFirstPage: true,
             isLastPage: false,
         };
@@ -156,23 +161,31 @@ export default {
         },
         async handleSubmit() {
             this.error = null;
+            this.isSubmitting = true;
 
             if (!this.person.name) {
-                showAlert('error', 'Nome é obrigatório.');
+                showAlert('warning', 'Nome é obrigatório.');
+                this.isSubmitting = false;
                 return;
             }
             if (!this.person.email || !this.validateEmail(this.person.email)) {
-                showAlert('error', 'Email inválido.');
+                showAlert('warning', 'Email inválido.');
+                this.isSubmitting = false;
                 return;
             }
             if (!this.person.cpf || !this.validateCPF(this.person.cpf)) {
-                showAlert('error', 'CPF inválido.');
+                showAlert('warning', 'CPF precisa ter 11 digitos.');
+                this.isSubmitting = false;
                 return;
             }
             if (!this.person.birthDate) {
-                showAlert('error', 'Data de nascimento é obrigatória.');
+                showAlert('warning', 'Data de nascimento é obrigatória.');
+                this.isSubmitting = false;
                 return;
             }
+
+            // Remove mask before sending the CPF
+            this.person.cpf = this.person.cpf.replace(/\D/g, '');
 
             try {
                 if (this.isEditMode) {
@@ -186,7 +199,13 @@ export default {
                 this.dialog = false;
                 this.resetForm();
             } catch (error) {
-                showAlert('error', 'Erro ao salvar pessoa.');
+                if (error.response && error.response.data && error.response.data.message && error.response.data.message.startsWith('INVCPF')) {
+                    showAlert('error', 'O CPF informado é inválido.');
+                } else {
+                    showAlert('error', 'Erro ao salvar pessoa.');
+                }
+            } finally {
+                this.isSubmitting = false;
             }
         },
         validateEmail(email) {
@@ -194,6 +213,8 @@ export default {
             return re.test(String(email).toLowerCase());
         },
         validateCPF(cpf) {
+            // Remove non-numeric characters before validation
+            cpf = cpf.replace(/\D/g, '');
             const re = /^\d{11}$/;
             return re.test(cpf);
         },
@@ -214,6 +235,10 @@ export default {
             this.person = { ...item };
             this.isEditMode = true;
             this.dialog = true;
+        },
+        closeDialog() {
+            this.dialog = false;
+            this.resetForm();
         },
         confirmDelete(id) {
             this.deletePersonId = id;
@@ -239,6 +264,9 @@ export default {
             } catch (error) {
                 showAlert('error', 'Erro ao buscar detalhes da pessoa.');
             }
+        },
+        formatCPF(cpf) {
+            return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
         },
         async prevPage() {
             if (this.options.page > 1) {
