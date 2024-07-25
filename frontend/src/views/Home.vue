@@ -3,12 +3,13 @@
         <v-card style="width: 80%;">
             <v-card-title class="d-flex justify-space-between align-center">
                 Listagem de Pessoas
-                <v-btn color="primary" @click="openDialog">Adicionar Pessoa</v-btn>
+                <v-btn color="primary" @click="openDialog">Cadastrar</v-btn>
             </v-card-title>
             <v-data-table :headers="headers" :items="items" :loading="loading" class="elevation-1" hide-default-footer>
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-                    <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
+                    <v-icon small class="mr-2" @click="showDetails(item.id)">mdi-eye</v-icon>
+                    <v-icon small @click="confirmDelete(item.id)">mdi-delete</v-icon>
                 </template>
             </v-data-table>
             <v-card-actions class="d-flex justify-space-between">
@@ -16,10 +17,11 @@
                 <v-btn @click="nextPage" :disabled="isLastPage">Avançar Página</v-btn>
             </v-card-actions>
         </v-card>
+
         <v-dialog v-model="dialog" max-width="500px">
             <v-card>
                 <v-card-title>
-                    <span class="text-h5">Cadastrar Pessoa</span>
+                    <span class="text-h5">{{ isEditMode ? 'Editar Pessoa' : 'Cadastrar Pessoa' }}</span>
                 </v-card-title>
                 <v-card-text>
                     <v-form @submit.prevent="handleSubmit">
@@ -28,9 +30,40 @@
                         <v-text-field v-model="person.cpf" label="CPF" required></v-text-field>
                         <v-text-field v-model="person.birthDate" label="Data de Nascimento" type="date"
                             required></v-text-field>
-                        <v-btn type="submit" color="primary">Salvar</v-btn>
+                        <v-btn type="submit" color="primary">{{ isEditMode ? 'Atualizar' : 'Salvar' }}</v-btn>
                     </v-form>
                 </v-card-text>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="confirmDeleteDialog" max-width="500px">
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5">Confirmar Exclusão</span>
+                </v-card-title>
+                <v-card-text>Você tem certeza de que deseja deletar esta pessoa?</v-card-text>
+                <v-card-actions>
+                    <v-btn color="primary" @click="performDelete">Sim</v-btn>
+                    <v-btn @click="confirmDeleteDialog = false">Cancelar</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="detailsDialog" max-width="500px">
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5">Detalhes da Pessoa</span>
+                </v-card-title>
+                <v-card-text>
+                    <p><strong>ID:</strong> {{ personDetails.id }}</p>
+                    <p><strong>Nome:</strong> {{ personDetails.name }}</p>
+                    <p><strong>Email:</strong> {{ personDetails.email }}</p>
+                    <p><strong>CPF:</strong> {{ personDetails.cpf }}</p>
+                    <p><strong>Data de Nascimento:</strong> {{ personDetails.birthDate }}</p>
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn @click="detailsDialog = false">Fechar</v-btn>
+                </v-card-actions>
             </v-card>
         </v-dialog>
     </v-container>
@@ -45,27 +78,36 @@ export default {
     data() {
         return {
             headers: [
-                { text: 'ID', value: 'id', sortable: true },
-                { text: 'Nome', value: 'name', sortable: true },
-                { text: 'Email', value: 'email', sortable: true },
-                { text: 'CPF', value: 'cpf', sortable: true },
-                { text: 'Data de Nascimento', value: 'birthDate', sortable: true },
-                { text: 'Ações', value: 'actions', sortable: false },
+                { title: 'ID', value: 'id', sortable: true, width: '100px' },
+                { title: 'Nome', value: 'name', sortable: true, align: 'left' },
+                { title: 'Ações', value: 'actions', sortable: false, align: 'right', width: '150px', class: 'actions-column' },
             ],
             items: [],
             loading: true,
             options: {
                 page: 1,
-                sortBy: [],
-                sortDesc: [],
+                sortBy: ['id'],
+                sortDesc: [false],
             },
             dialog: false,
+            confirmDeleteDialog: false,
+            detailsDialog: false,
             person: {
+                id: null,
                 name: '',
                 email: '',
                 cpf: '',
                 birthDate: '',
             },
+            personDetails: {
+                id: null,
+                name: '',
+                email: '',
+                cpf: '',
+                birthDate: '',
+            },
+            deletePersonId: null,
+            isEditMode: false,
             error: null,
             isFirstPage: true,
             isLastPage: false,
@@ -76,8 +118,9 @@ export default {
             this.loading = true;
 
             const itemsPerPage = 5;
-            const { page, sortDesc } = this.options;
+            const { page, sortBy, sortDesc } = this.options;
             const currentPage = page - 1;
+            const orderBy = (sortBy && sortBy.length > 0) ? sortBy[0] : 'id';
             const direction = (sortDesc && sortDesc.length > 0 && sortDesc[0]) ? 'DESC' : 'ASC';
 
             try {
@@ -85,6 +128,7 @@ export default {
                     params: {
                         page: currentPage,
                         size: itemsPerPage,
+                        orderBy,
                         direction,
                     },
                 });
@@ -98,6 +142,7 @@ export default {
                         params: {
                             page: currentPage + 1,
                             size: itemsPerPage,
+                            orderBy,
                             direction,
                         },
                     });
@@ -130,13 +175,18 @@ export default {
             }
 
             try {
-                await api.post('/person/', this.person);
+                if (this.isEditMode) {
+                    await api.patch(`/person/${this.person.id}`, this.person);
+                    showAlert('success', 'Pessoa atualizada com sucesso!');
+                } else {
+                    await api.post('/person/', this.person);
+                    showAlert('success', 'Pessoa cadastrada com sucesso!');
+                }
                 this.fetchData();
                 this.dialog = false;
                 this.resetForm();
-                showAlert('success', 'Pessoa cadastrada com sucesso!');
             } catch (error) {
-                showAlert('error', 'Erro ao cadastrar pessoa.');
+                showAlert('error', 'Erro ao salvar pessoa.');
             }
         },
         validateEmail(email) {
@@ -149,22 +199,46 @@ export default {
         },
         resetForm() {
             this.person = {
+                id: null,
                 name: '',
                 email: '',
                 cpf: '',
                 birthDate: '',
             };
+            this.isEditMode = false;
         },
         openDialog() {
             this.dialog = true;
         },
         editItem(item) {
-            // Lógica para editar o item
-            console.log('Edit item:', item);
+            this.person = { ...item };
+            this.isEditMode = true;
+            this.dialog = true;
         },
-        deleteItem(item) {
-            // Lógica para deletar o item
-            console.log('Delete item:', item);
+        confirmDelete(id) {
+            this.deletePersonId = id;
+            this.confirmDeleteDialog = true;
+        },
+        async performDelete() {
+            try {
+                await api.delete(`/person/${this.deletePersonId}`);
+                showAlert('success', 'Pessoa deletada com sucesso!');
+                this.fetchData();
+            } catch (error) {
+                showAlert('error', 'Erro ao deletar pessoa.');
+            } finally {
+                this.confirmDeleteDialog = false;
+                this.deletePersonId = null;
+            }
+        },
+        async showDetails(id) {
+            try {
+                const response = await api.get(`/person/${id}`);
+                this.personDetails = response.data;
+                this.detailsDialog = true;
+            } catch (error) {
+                showAlert('error', 'Erro ao buscar detalhes da pessoa.');
+            }
         },
         async prevPage() {
             if (this.options.page > 1) {
@@ -200,5 +274,10 @@ export default {
 </script>
 
 <style scoped>
-/* Adicione estilos personalizados aqui, se necessário */
+/* Fixar a coluna de ações à direita */
+.v-data-table .actions-column {
+    position: sticky;
+    right: 0;
+    background-color: white;
+}
 </style>

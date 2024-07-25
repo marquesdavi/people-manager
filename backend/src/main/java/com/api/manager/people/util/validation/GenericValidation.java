@@ -27,7 +27,7 @@ public class GenericValidation {
 
     public static void validateCpf(String cpf) {
         if(!isValidCpf(cpf)){
-            throw new IllegalArgumentException("Invalid CPF!");
+            throw new IllegalArgumentException("INVCPF - Invalid CPF!");
         }
     }
 }
