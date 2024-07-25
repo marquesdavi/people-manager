@@ -12,9 +12,9 @@
                     <li class="nav-item" v-if="!isAuthenticated"><router-link class="nav-link"
                             to="/login">Login</router-link></li>
                     <li class="nav-item" v-if="!isAuthenticated"><router-link class="nav-link"
-                            to="/signup">Register</router-link></li>
+                            to="/signup">Cadastrar-se</router-link></li>
                     <li class="nav-item" v-if="isAuthenticated">
-                        <button class="btn btn-link nav-link" @click="handleLogout">Logout</button>
+                        <button class="btn btn-link nav-link" @click="handleLogout">Sair</button>
                     </li>
                 </ul>
             </div>

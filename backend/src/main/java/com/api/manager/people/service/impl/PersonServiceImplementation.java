@@ -105,11 +105,12 @@ public class PersonServiceImplementation implements PersonService {
         validateOrderBy(Person.class, orderBy);
         Sort.Direction sortDirection = validateSortDirection(direction);
 
-        PageRequest pageable = PageRequest.of(page, size, sortDirection, orderBy);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(sortDirection, orderBy));
         Page<Person> persons = repository.findAll(pageable);
 
         return persons.stream().map(PersonMapper::toDTO).toList();
     }
+
 
 
     public Person findPersonById(Long id) {

@@ -3,10 +3,9 @@
         <v-card style="width: 80%;">
             <v-card-title class="d-flex justify-space-between align-center">
                 Listagem de Pessoas
-                <v-btn @click="openDialog">Adicionar Pessoa</v-btn>
+                <v-btn color="primary" @click="openDialog">Adicionar Pessoa</v-btn>
             </v-card-title>
-            <v-data-table :headers="headers" :items="items" :server-items-length="totalItems" :loading="loading"
-                :options.sync="options" @update:options="updateOptions" class="elevation-1" hide-default-footer>
+            <v-data-table :headers="headers" :items="items" :loading="loading" class="elevation-1" hide-default-footer>
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
                     <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
@@ -31,7 +30,6 @@
                             required></v-text-field>
                         <v-btn type="submit" color="primary">Salvar</v-btn>
                     </v-form>
-                    <p v-if="error" class="text-danger">{{ error }}</p>
                 </v-card-text>
             </v-card>
         </v-dialog>
@@ -40,6 +38,7 @@
 
 <script>
 import api from '../utils/request';
+import { showAlert } from '../utils/alertUtil';
 
 export default {
     name: 'Home',
@@ -54,7 +53,6 @@ export default {
                 { text: 'Ações', value: 'actions', sortable: false },
             ],
             items: [],
-            totalItems: 0,
             loading: true,
             options: {
                 page: 1,
@@ -77,11 +75,9 @@ export default {
         async fetchData() {
             this.loading = true;
 
-            var itemsPerPage = 6;
-
-            const { page, sortBy, sortDesc } = this.options;
-            const currentPage = page - 1; // Ajusta a página para começar de 0
-            const orderBy = (sortBy && sortBy.length > 0) ? sortBy[0] : 'birthDate';
+            const itemsPerPage = 5;
+            const { page, sortDesc } = this.options;
+            const currentPage = page - 1;
             const direction = (sortDesc && sortDesc.length > 0 && sortDesc[0]) ? 'DESC' : 'ASC';
 
             try {
@@ -89,56 +85,58 @@ export default {
                     params: {
                         page: currentPage,
                         size: itemsPerPage,
-                        orderBy,
                         direction,
                     },
                 });
 
-                this.items = response.data; // Ajuste para pegar diretamente os dados retornados
-                this.totalItems = response.data.length; // Ajuste para definir o total de itens retornados
-
-                // Atualiza os estados dos botões de navegação
+                this.items = response.data;
                 this.isFirstPage = currentPage === 0;
                 this.isLastPage = response.data.length < itemsPerPage;
+
+                if (!this.isLastPage) {
+                    const nextPageResponse = await api.get('/person/', {
+                        params: {
+                            page: currentPage + 1,
+                            size: itemsPerPage,
+                            direction,
+                        },
+                    });
+                    this.isLastPage = nextPageResponse.data.length === 0;
+                }
             } catch (error) {
-                console.error('Error fetching data:', error);
+                showAlert('error', 'Erro ao buscar dados.');
             } finally {
                 this.loading = false;
             }
         },
-        updateOptions(options) {
-            this.options = { ...this.options, ...options };
-            this.fetchData();
-        },
         async handleSubmit() {
             this.error = null;
 
-            // Validações manuais
             if (!this.person.name) {
-                this.error = 'Nome é obrigatório.';
+                showAlert('error', 'Nome é obrigatório.');
                 return;
             }
             if (!this.person.email || !this.validateEmail(this.person.email)) {
-                this.error = 'Email inválido.';
+                showAlert('error', 'Email inválido.');
                 return;
             }
             if (!this.person.cpf || !this.validateCPF(this.person.cpf)) {
-                this.error = 'CPF inválido.';
+                showAlert('error', 'CPF inválido.');
                 return;
             }
             if (!this.person.birthDate) {
-                this.error = 'Data de nascimento é obrigatória.';
+                showAlert('error', 'Data de nascimento é obrigatória.');
                 return;
             }
 
             try {
                 await api.post('/person/', this.person);
-                this.fetchData(); // Atualiza os dados da tabela após o cadastro
+                this.fetchData();
                 this.dialog = false;
                 this.resetForm();
+                showAlert('success', 'Pessoa cadastrada com sucesso!');
             } catch (error) {
-                this.error = 'Erro ao cadastrar pessoa.';
-                console.error('Error creating person:', error);
+                showAlert('error', 'Erro ao cadastrar pessoa.');
             }
         },
         validateEmail(email) {
@@ -146,8 +144,6 @@ export default {
             return re.test(String(email).toLowerCase());
         },
         validateCPF(cpf) {
-            // Adicione a lógica de validação de CPF aqui
-            // Esta é uma validação básica, você pode substituí-la por uma mais robusta
             const re = /^\d{11}$/;
             return re.test(cpf);
         },
@@ -182,9 +178,9 @@ export default {
                 await this.fetchData();
                 if (this.items.length === 0) {
                     this.options.page--;
-                    this.isLastPage = true; // Desativa o botão de próxima página
+                    this.isLastPage = true;
                 } else {
-                    this.isLastPage = false; // Ativa o botão de próxima página
+                    this.isLastPage = false;
                 }
             }
         },

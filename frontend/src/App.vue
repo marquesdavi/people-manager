@@ -11,12 +11,14 @@
 <script>
 import Navbar from './components/Navbar.vue';
 import Footer from './components/Footer.vue';
+import Alert from './components/Alert.vue';
 
 export default {
   name: 'App',
   components: {
     Navbar,
     Footer,
+    Alert
   },
 };
 </script>

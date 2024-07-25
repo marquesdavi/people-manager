@@ -21,7 +21,7 @@ export const useAuthStore = defineStore("auth", {
 				this.setToken(accessToken);
 				localStorage.setItem("expiresIn", expiresIn);
 			} catch (error) {
-				throw new Error("Login failed.");
+				showAlert("error", "Erro ao fazer login.");
 			}
 		},
 		async signup(firstName, lastName, email, password) {
@@ -33,7 +33,7 @@ export const useAuthStore = defineStore("auth", {
 					password,
 				});
 			} catch (error) {
-				throw new Error("Signup failed.");
+				showAlert("error", "Erro ao tentar registrar.");
 			}
 		},
 	},

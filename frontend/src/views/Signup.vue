@@ -45,7 +45,7 @@ export default {
                 await authStore.signup(this.firstName, this.lastName, this.email, this.password);
                 this.$router.push('/login');
             } catch (error) {
-                this.error = 'Signup failed. Please check your information and try again.';
+                this.error = 'O cadastro falhou. Por favor, revise as informações e tente novamente.';
             }
         },
     },
@@ -53,5 +53,4 @@ export default {
 </script>
 
 <style scoped>
-/* Adicione estilos personalizados aqui, se necessário */
 </style>

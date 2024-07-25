@@ -9,7 +9,7 @@
                     <span v-if="!isLoggedIn">
                         <a class="small"><router-link to="/login">Login</router-link></a>
                         <span class="mx-1">&middot;</span>
-                        <a class="small"><router-link to="/signup">Register</router-link></a>
+                        <a class="small"><router-link to="/signup">Cadastrar-se</router-link></a>
                     </span>
                 </div>
             </div>
@@ -29,5 +29,4 @@ export default {
 </script>
 
 <style scoped>
-/* Adicione estilos personalizados aqui, se necessário */
 </style>

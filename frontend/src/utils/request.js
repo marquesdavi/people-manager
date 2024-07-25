@@ -1,6 +1,7 @@
 import axios from "axios";
 import router from "../router";
 import { useAuthStore } from "../stores/auth";
+import { showAlert } from "../utils/alertUtil";
 
 const api = axios.create({
 	baseURL: "http://localhost:8080", // Base URL da API
@@ -47,7 +48,7 @@ export async function validateToken() {
 		);
 		return response.status === 200;
 	} catch (error) {
-		console.error("Token validation error:", error);
+		showAlert("warning", "Sua sessão expirou. Faça login novamente!");
 		return false;
 	}
 }
