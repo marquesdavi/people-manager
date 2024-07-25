@@ -11,9 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -26,6 +24,7 @@ import java.util.stream.Collectors;
 public class AuthenticationServiceImplementation implements AuthenticationService {
 
     private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
     private final IUserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -62,5 +61,18 @@ public class AuthenticationServiceImplementation implements AuthenticationServic
         var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
         return new TokenResponse(jwtValue, expiresIn);
+    }
+
+    @Override
+    public boolean validateToken(String token) {
+        try {
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+            jwtDecoder.decode(token);
+            return true;
+        } catch (JwtException e) {
+            return false;
+        }
     }
 }

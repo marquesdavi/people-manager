@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,7 +35,7 @@ public class PersonController {
             @ApiResponse(responseCode = "404", description = "Person not found")
     })
     @GetMapping("/{id}")
-    @Cacheable(value = "person-find-by-id")
+    @Cacheable(value = "person-find-by-id", key = "#id")
     public ResponseEntity<PersonResponse> getById(@PathVariable(name = "id") Long id) {
         PersonResponse personResponse = personService.getById(id);
         return ResponseEntity.ok(personResponse);
@@ -63,6 +65,7 @@ public class PersonController {
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
     @PostMapping("/")
+    @CacheEvict(value = "people-find-all", allEntries = true)
     public ResponseEntity<DefaultResponse> createPerson(
             @Valid @RequestBody PersonRequest person
     ) {
@@ -77,6 +80,10 @@ public class PersonController {
             @ApiResponse(responseCode = "404", description = "Person not found")
     })
     @PatchMapping("/{id}")
+    @Caching(evict = {
+            @CacheEvict(value = "person-find-by-id", key = "#id"),
+            @CacheEvict(value = "people-find-all", allEntries = true)
+    })
     public ResponseEntity<DefaultResponse> updatePerson(
             @PathVariable(name = "id") Long id, @RequestBody PersonRequest person
     ) {
@@ -90,6 +97,10 @@ public class PersonController {
             @ApiResponse(responseCode = "404", description = "Person not found")
     })
     @DeleteMapping("/{id}")
+    @Caching(evict = {
+            @CacheEvict(value = "person-find-by-id", key = "#id"),
+            @CacheEvict(value = "people-find-all", allEntries = true)
+    })
     public ResponseEntity<DefaultResponse> deletePerson(
             @PathVariable(name = "id") Long id
     ) {

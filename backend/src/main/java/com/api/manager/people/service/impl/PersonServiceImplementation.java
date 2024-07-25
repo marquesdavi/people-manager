@@ -18,7 +18,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.security.InvalidParameterException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.api.manager.people.util.validation.GenericValidation.*;
 
@@ -91,6 +94,7 @@ public class PersonServiceImplementation implements PersonService {
         return PersonMapper.toDTO(person);
     }
 
+
     @Override
     public List<PersonResponse> getAll(
             @PositiveOrZero Integer page,
@@ -101,11 +105,13 @@ public class PersonServiceImplementation implements PersonService {
         validateOrderBy(Person.class, orderBy);
         Sort.Direction sortDirection = validateSortDirection(direction);
 
-        PageRequest pageable = PageRequest.of(page, size, sortDirection, orderBy);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(sortDirection, orderBy));
         Page<Person> persons = repository.findAll(pageable);
 
         return persons.stream().map(PersonMapper::toDTO).toList();
     }
+
+
 
     public Person findPersonById(Long id) {
         return repository.findById(id)

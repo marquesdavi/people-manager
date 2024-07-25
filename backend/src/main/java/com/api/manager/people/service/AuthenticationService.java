@@ -5,4 +5,5 @@ import com.api.manager.people.model.dto.auth.TokenResponse;
 
 public interface AuthenticationService {
     TokenResponse login(LoginRequest request);
+    boolean validateToken(String token);
 }

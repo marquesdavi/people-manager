@@ -5,6 +5,7 @@ import com.api.manager.people.model.dto.person.PersonResponse;
 import com.api.manager.people.model.vo.DefaultResponse;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PersonService {
     void createPerson(PersonRequest request);
