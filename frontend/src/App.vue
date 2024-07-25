@@ -24,6 +24,5 @@ export default {
 </script>
 
 <style>
-/* Importa estilos globais */
 @import './style.css';
 </style>

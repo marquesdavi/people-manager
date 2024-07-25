@@ -16,11 +16,11 @@ export default {
     },
     methods: {
         addAlert(type, message) {
-            const id = Date.now(); // Cria um ID único para cada alerta
+            const id = Date.now();
             this.alerts.push({ id, type, message });
             setTimeout(() => {
                 this.removeAlertById(id);
-            }, 3500); // Ajuste o tempo conforme necessário
+            }, 3500);
         },
         removeAlert(index) {
             this.alerts.splice(index, 1);

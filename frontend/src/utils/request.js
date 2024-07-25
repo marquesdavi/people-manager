@@ -4,7 +4,7 @@ import { useAuthStore } from "../stores/auth";
 import { showAlert } from "../utils/alertUtil";
 
 const api = axios.create({
-	baseURL: "http://localhost:8080", // Base URL da API
+	baseURL: "http://localhost:8080",
 });
 
 api.interceptors.request.use(

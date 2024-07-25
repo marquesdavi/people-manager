@@ -274,7 +274,6 @@ export default {
 </script>
 
 <style scoped>
-/* Fixar a coluna de ações à direita */
 .v-data-table .actions-column {
     position: sticky;
     right: 0;
