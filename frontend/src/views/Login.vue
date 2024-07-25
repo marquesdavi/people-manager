@@ -1,22 +1,24 @@
 <template>
-    <div class="container py-5">
-        <h2>Login</h2>
-        <form @submit.prevent="handleLogin">
-            <div class="mb-3">
-                <label for="email" class="form-label">Email address</label>
-                <input type="email" class="form-control" id="email" v-model="email" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" v-model="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-        <p v-if="error" class="text-danger">{{ error }}</p>
-    </div>
+    <v-container class="d-flex justify-center align-center" style="min-height: 100vh;">
+        <v-card style="width: 400px;">
+            <v-card-title class="d-flex justify-center">
+                <h2>Entrar</h2>
+            </v-card-title>
+            <v-card-text>
+                <v-form @submit.prevent="handleLogin">
+                    <v-text-field v-model="email" label="Endereço de email" type="email" required>
+                    </v-text-field>
+                    <v-text-field v-model="password" label="Senha" type="password" required>
+                    </v-text-field>
+                    <v-btn type="submit" color="primary" block>Entrar</v-btn>
+                </v-form>
+            </v-card-text>
+        </v-card>
+    </v-container>
 </template>
 
 <script>
+import { showAlert } from '../utils/alertUtil';
 import { useAuthStore } from '../stores/auth';
 
 export default {
@@ -25,22 +27,30 @@ export default {
         return {
             email: '',
             password: '',
-            error: null,
         };
     },
     methods: {
         async handleLogin() {
+
+            if (!this.email) {
+                showAlert('warning', 'Email é obrigatório.');
+                return;
+            }
+            if (!this.password) {
+                showAlert('warning', 'Senha é obrigatória.');
+                return;
+            }
+
             const authStore = useAuthStore();
             try {
                 await authStore.login(this.email, this.password);
                 this.$router.push('/');
             } catch (error) {
-                this.error = 'Login failed. Please check your credentials and try again.';
+                showAlert('error', 'Falha no login. Por favor, verifique suas credenciais e tente novamente.');
             }
         },
     },
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

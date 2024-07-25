@@ -22,9 +22,20 @@ api.interceptors.response.use(
 	(response) => response,
 	async (error) => {
 		if (error.response && error.response.status === 400) {
+			if (
+				error.response.data.message &&
+				error.response.data.message.startsWith("INVCPF")
+			) {
+				
+			} else {
+				showAlert("error", "Erro ao processar a solicitação.");
+			}
+		} else if (error.response && error.response.status === 401) {
 			const authStore = useAuthStore();
 			authStore.clearToken();
 			router.push("/login");
+		} else {
+			showAlert("error", "Ocorreu um erro inesperado.");
 		}
 		return Promise.reject(error);
 	}
