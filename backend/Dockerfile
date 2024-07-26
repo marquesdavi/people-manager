@@ -7,7 +7,6 @@ COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
-COPY compose.yaml .
 COPY src/main/resources/application.properties src/main/resources/application.properties
 
 RUN ./mvnw clean package -DskipTests
