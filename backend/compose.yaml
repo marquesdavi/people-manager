@@ -14,5 +14,30 @@ services:
     networks:
       - people
 
+  backend:
+    build: .
+    container_name: backend_container
+    ports:
+      - '8080:8080'
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_container:3306/person
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: 102030
+    networks:
+      - people
+    depends_on:
+      - mysql
+
+  frontend:
+    build:
+      context: ../frontend
+    container_name: frontend_container
+    ports:
+      - '5173:5173'
+    networks:
+      - people
+    depends_on:
+      - backend
+
 networks:
   people:
