@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: 'mysql:latest'
+    container_name: mysql_container
+    environment:
+      - 'MYSQL_DATABASE=person'
+      - 'MYSQL_PASSWORD=102030'
+      - 'MYSQL_ROOT_PASSWORD=102030'
+      - 'MYSQL_USER=user'
+    ports:
+      - '3307:3306'
+    networks:
+      - people
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend_container
+    ports:
+      - '8080:8080'
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_container:3306/person
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: 102030
+    networks:
+      - people
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend_container
+    ports:
+      - '5173:5173'
+    networks:
+      - people
+    depends_on:
+      - backend
+
+networks:
+  people:
