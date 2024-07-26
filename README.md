@@ -15,6 +15,7 @@
 - Spring Data JPA
 - Spring Data Redis
 - Spring Security
+- Spring Boot Test (JUnit)
 - Lombok
 - Swagger
 - MySQL 
