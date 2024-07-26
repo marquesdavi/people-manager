@@ -28,9 +28,10 @@
 
 #### Tecnologias
 - Javascript
-- Vue
-- Vuetify
+- Vite
+- Vue(**Vuetify**)
 - Pinia
+- Axios
 
 #### Resumo
 - O Frontend consome todos os endpoints da API, incluindo validações, máscaras e uma interface amigável, permitindo que o usuário se registre, faça login e execute todas as operações relacionadas a pessoas.
