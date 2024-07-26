@@ -72,6 +72,11 @@ Abra um navegador e navegue até `http://localhost:5173/`.
 
 O backend estará disponível em `http://localhost:8080/`.
 
+### Rodar Testes do Backend
+
+1. Entrar na pasta do backend
+2. Executar o comando `mvn clean test`
+
 ### Parar os Contêineres
 
 Para parar os contêineres, pressione `Ctrl+C` no terminal onde os contêineres estão sendo executados ou execute:
